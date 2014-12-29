@@ -4,15 +4,14 @@ var Cat = function(name, count, img) {
   this.img = img;
 };
 Cat.prototype.incrementCount = function() {
-  var selector = '#' + this.name + ' span.count';
-
   this.count += 1;
-  document.querySelector(selector).innerHTML = this.count;
+  document.querySelector('#' + this.name + ' .count').innerText = this.count;
 };
 
 
 var App = {
   init: function(count, cat) {
+
     var cat1 = new Cat('Mausi', 0, 'img/cat1.jpg');
     var cat2 = new Cat('Katzi', 0, 'img/cat2.jpg');
     App.cats.push(cat1);
@@ -20,15 +19,20 @@ var App = {
 
     App.updateDom('#cats');
 
-    var cat1Selector = '#' + cat1.name + ' img';
-    var cat2Selector = '#' + cat2.name + ' img';
+    for (var i = 0; i < App.cats.length; i++) {
+      var cat = App.cats[i];
+      var selector = '#' + cat.name + ' img';
 
-    document.querySelector(cat1Selector).onclick = function() {
-      cat1.incrementCount();
-    };
-    document.querySelector(cat2Selector).onclick = function() {
-      cat2.incrementCount();
-    };
+      var domCat = document.querySelector(selector);
+
+      console.log(domCat);
+
+      domCat.addEventListener('click', (function(catCopy) {
+        return function() {
+          catCopy.incrementCount();
+        };
+      })(cat));
+    }
 
   },
 
