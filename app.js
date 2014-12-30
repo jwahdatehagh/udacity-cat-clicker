@@ -29,6 +29,20 @@ var App = {
   octopus: {
     init: function() {
       App.model.init();
+      App.listView.init();
+    }
+  },
+
+  view: {
+    render: function(name, destination) {
+      // regex: /{{\w[^ }-]*}}/g
+      // tag.substring(2, tag.length - 2);
+      
+      this.template = $('script[data-template="' + name + '"]').html();
+      this.templateVars = [];
+      alert(this.template.search(/{{\w[^ }-]*}}/g));
+
+
     }
   },
 
@@ -38,9 +52,7 @@ var App = {
     },
 
     render: function() {
-      // regex: /{{\w[^ }-]*}}/g
-      // tag.substring(2, tag.length - 2);
-      
+      App.view.render('list', '#cats-list');
     }
   },
 
@@ -50,7 +62,7 @@ var App = {
     },
 
     render: function() {
-
+      App.view.render('cat', '#cats');
     }
   }
 
