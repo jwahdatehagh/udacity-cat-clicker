@@ -5,117 +5,55 @@ var Cat = function(name, count, img) {
 };
 Cat.prototype.incrementCount = function() {
   this.count += 1;
-  document.querySelector('#' + this.name + ' .count').innerText = this.count;
 };
 
-
 var App = {
-  init: function(count, cat) {
 
-    var cat1 = new Cat('Mausi', 0, 'img/cat1.jpg');
-    var cat2 = new Cat('Katzi', 0, 'img/cat2.jpg');
-    var cat3 = new Cat('CuddleCat', 0, 'img/cat3.jpg');
-    App.cats.push(cat1);
-    App.cats.push(cat2);
-    App.cats.push(cat3);
-
-    App.updateDom('#cats-list');
-    App.updateDom('#cats');
-
-    for (var i = 0; i < App.cats.length; i++) {
-      var cat = App.cats[i];
-      var domListCat = document.querySelector('#list-' + cat.name);
-
-      domListCat.addEventListener('click', (function(catCopy) {
-        return function() {
-          App.selectedCat = catCopy.name;
-
-          App.updateDom('#cats');
-        }
-      })(cat));
-    }
-
+  data: {
+    cats: []
   },
 
-  selectedCat: null,
-
-  buildTemplate: function(template, data) {
-    var string = template.string;
-
-    for (var i = 0; i < template.vars.length; i++) {
-      var selector = template.vars[i].toLowerCase();
-      var re = new RegExp(template.vars[i], "g");
-      string = string.replace(re , data[selector]);
+  model: {
+    init: function() {
+      var cat1 = new Cat('Mausi', 0, 'img/cat1.jpg');
+      var cat2 = new Cat('Katzi', 0, 'img/cat2.jpg');
+      var cat3 = new Cat('CuddleCat', 0, 'img/cat3.jpg');
+      var cat4 = new Cat('Scar', 0, 'img/cat4.jpg');
+      App.data.cats.push(cat1);
+      App.data.cats.push(cat2);
+      App.data.cats.push(cat3);
+      App.data.cats.push(cat4);
     }
-
-    return string;
   },
 
-  updateDom: function(destination) {
-    var strings = [];
-
-    if (destination === '#cats') {
-      for (var i = 0; i < App.cats.length; i++) {
-        var cat = App.cats[i];
-
-        if (cat.name === App.selectedCat) {
-          strings.push(App.buildTemplate(App.templates.cat, cat));
-        }
-
-      }
-    } else if (destination === '#cats-list') {
-      for (var i = 0; i < App.cats.length; i++) {
-        var cat = App.cats[i];
-
-        strings.push(App.buildTemplate(App.templates.list, cat));
-      }
+  octopus: {
+    init: function() {
+      App.model.init();
     }
-
-    var dest = document.querySelector(destination);
-    var finalString = '';
-
-    for (var i = 0; i < strings.length; i++) {
-      finalString += strings[i];
-    }
-
-    dest.innerHTML = finalString;
-
-    if (destination === '#cats') {
-      for (var i = 0; i < App.cats.length; i++) {
-        var cat = App.cats[i];
-
-        if (cat.name === App.selectedCat) {
-          var selector = '#' + cat.name + ' img';
-
-          var domCat = document.querySelector(selector);
-
-          domCat.addEventListener('click', (function(catCopy) {
-            return function() {
-              catCopy.incrementCount();
-            };
-          })(cat));
-        }
-
-      }
-    }
-
   },
 
-  cats: [],
-
-  templates: {
-    cat: {
-      id: 'cat',
-      vars: ['NAME', 'COUNT', 'IMG'],
-      string: '<hr><div class="cat" id="NAME"><p>Count for NAME: <span class="count">COUNT</span></p><img src="IMG" alt="Cat"></div>'
+  listView: {
+    init: function() {
+      this.render();
     },
-    list: {
-      id: 'list',
-      vars: ['NAME'],
-      string: '<li id="list-NAME">NAME</li>'
+
+    render: function() {
+      // regex: /{{\w[^ }-]*}}/g
+      // tag.substring(2, tag.length - 2);
+      
+    }
+  },
+
+  catView: {
+    init: function() {
+      this.render();
+    },
+
+    render: function() {
+
     }
   }
 
 };
 
-App.init('#count', '#cat');
+App.octopus.init();
