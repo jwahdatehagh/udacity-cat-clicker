@@ -14,27 +14,30 @@ var App = {
 
     var cat1 = new Cat('Mausi', 0, 'img/cat1.jpg');
     var cat2 = new Cat('Katzi', 0, 'img/cat2.jpg');
+    var cat3 = new Cat('CuddleCat', 0, 'img/cat3.jpg');
     App.cats.push(cat1);
     App.cats.push(cat2);
+    App.cats.push(cat3);
 
+    App.updateDom('#cats-list');
     App.updateDom('#cats');
 
     for (var i = 0; i < App.cats.length; i++) {
       var cat = App.cats[i];
-      var selector = '#' + cat.name + ' img';
+      var domListCat = document.querySelector('#list-' + cat.name);
 
-      var domCat = document.querySelector(selector);
-
-      console.log(domCat);
-
-      domCat.addEventListener('click', (function(catCopy) {
+      domListCat.addEventListener('click', (function(catCopy) {
         return function() {
-          catCopy.incrementCount();
-        };
+          App.selectedCat = catCopy.name;
+
+          App.updateDom('#cats');
+        }
       })(cat));
     }
 
   },
+
+  selectedCat: null,
 
   buildTemplate: function(template, data) {
     var string = template.string;
@@ -51,11 +54,21 @@ var App = {
   updateDom: function(destination) {
     var strings = [];
 
-    for (var i = 0; i < App.cats.length; i++) {
-      var cat = App.cats[i];
+    if (destination === '#cats') {
+      for (var i = 0; i < App.cats.length; i++) {
+        var cat = App.cats[i];
 
-      strings.push(App.buildTemplate(App.templates.cat, cat));
+        if (cat.name === App.selectedCat) {
+          strings.push(App.buildTemplate(App.templates.cat, cat));
+        }
 
+      }
+    } else if (destination === '#cats-list') {
+      for (var i = 0; i < App.cats.length; i++) {
+        var cat = App.cats[i];
+
+        strings.push(App.buildTemplate(App.templates.list, cat));
+      }
     }
 
     var dest = document.querySelector(destination);
@@ -67,6 +80,25 @@ var App = {
 
     dest.innerHTML = finalString;
 
+    if (destination === '#cats') {
+      for (var i = 0; i < App.cats.length; i++) {
+        var cat = App.cats[i];
+
+        if (cat.name === App.selectedCat) {
+          var selector = '#' + cat.name + ' img';
+
+          var domCat = document.querySelector(selector);
+
+          domCat.addEventListener('click', (function(catCopy) {
+            return function() {
+              catCopy.incrementCount();
+            };
+          })(cat));
+        }
+
+      }
+    }
+
   },
 
   cats: [],
@@ -76,6 +108,11 @@ var App = {
       id: 'cat',
       vars: ['NAME', 'COUNT', 'IMG'],
       string: '<hr><div class="cat" id="NAME"><p>Count for NAME: <span class="count">COUNT</span></p><img src="IMG" alt="Cat"></div>'
+    },
+    list: {
+      id: 'list',
+      vars: ['NAME'],
+      string: '<li id="list-NAME">NAME</li>'
     }
   }
 
