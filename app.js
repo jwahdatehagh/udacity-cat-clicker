@@ -7,22 +7,21 @@ Cat.prototype.incrementCount = function() {
   this.count += 1;
 };
 
+
 var App = {
 
-  data: {
-    cats: []
-  },
-
   model: {
+    cats: [],
+    
+    selectedCat: null,
+
     init: function() {
-      var cat1 = new Cat('Mausi', 0, 'img/cat1.jpg');
-      var cat2 = new Cat('Katzi', 0, 'img/cat2.jpg');
-      var cat3 = new Cat('CuddleCat', 0, 'img/cat3.jpg');
-      var cat4 = new Cat('Scar', 0, 'img/cat4.jpg');
-      App.data.cats.push(cat1);
-      App.data.cats.push(cat2);
-      App.data.cats.push(cat3);
-      App.data.cats.push(cat4);
+      App.model.cats.push(
+        new Cat('Mausi', 0, 'img/cat1.jpg'),
+        new Cat('Katzi', 0, 'img/cat2.jpg'),
+        new Cat('CuddleCat', 0, 'img/cat3.jpg'),
+        new Cat('Scar', 0, 'img/cat4.jpg')
+      );
     }
   },
 
@@ -30,19 +29,72 @@ var App = {
     init: function() {
       App.model.init();
       App.listView.init();
+    },
+
+    bindCatImgClickEvent: function(selectedCat) {
+      $('#' + selectedCat.name).on('click', (function(catCopy) {
+        return function() {
+          catCopy.incrementCount();
+          App.catView.render();
+        };
+      })(selectedCat));
+    },
+
+    bindCatListClickEvents: function() {
+      var cats = App.model.cats;
+      var catsLength = cats.length;
+      for (var i = 0; i < catsLength; i++) {
+        var cat = cats[i];
+        var domListCat = document.querySelector('#list-' + cat.name);
+
+        domListCat.addEventListener('click', (function(catCopy) {
+          return function() {
+            App.model.selectedCat = catCopy;
+
+            App.catView.render();
+          }
+        })(cat));
+      }
     }
+
   },
 
   view: {
-    render: function(name, destination) {
-      // regex: /{{\w[^ }-]*}}/g
-      // tag.substring(2, tag.length - 2);
+    render: function(name, destination, data) {
+      var finalTemplate = '';
       
-      this.template = $('script[data-template="' + name + '"]').html();
-      this.templateVars = [];
-      alert(this.template.search(/{{\w[^ }-]*}}/g));
+      // build up the final template for each data set
+      for(var i = 0; i < data.length; i++) {
+        finalTemplate += this.buildTemplate(name, data[i]);
+      }
 
+      $(destination).html(finalTemplate);
+    },
 
+    buildTemplate: function(name, data) {
+
+      // setup
+      var templateVars = [];
+      var template = $('script[data-template="' + name + '"]').html();
+
+      // find all the templateVars in the template string
+      for (var i = 0; i < template.length; i = firstPos > -1 ? firstPos + 1 : template.length) {
+        var firstPos = template.indexOf('{{', i);
+        var lastPos = template.indexOf('}}', firstPos);
+
+        if (firstPos > -1) {
+          templateVars.push(template.substring(firstPos + 2, lastPos));
+        }
+      }
+      
+      // replace the tags in the template with actual data
+      for (var i = 0; i < templateVars.length; i++) {
+        var tag = templateVars[i];
+        var re = new RegExp('{{' + tag + '}}', "g");
+        template = template.replace(re , data[tag]);
+      }
+
+      return template;
     }
   },
 
@@ -52,17 +104,20 @@ var App = {
     },
 
     render: function() {
-      App.view.render('list', '#cats-list');
+      App.view.render('list', '#cats-list', App.model.cats);
+      App.octopus.bindCatListClickEvents();
     }
+
   },
 
   catView: {
-    init: function() {
-      this.render();
-    },
-
     render: function() {
-      App.view.render('cat', '#cats');
+      var selectedCat = App.model.selectedCat;
+      if (selectedCat) {
+        App.view.render('cat', '#cat', [selectedCat]);
+
+        App.octopus.bindCatImgClickEvent(selectedCat);
+      }
     }
   }
 
