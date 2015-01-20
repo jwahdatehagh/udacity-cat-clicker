@@ -4,9 +4,11 @@ var Cat = function(name, count, img) {
   this.img = img;
 };
 Cat.prototype.incrementCount = function() {
-  this.count += 1;
+  this.count = parseInt(this.count) + 1;
 };
-
+Cat.prototype.set = function(property, value) {
+  this[property] = value;
+};
 
 var App = {
 
@@ -14,6 +16,8 @@ var App = {
     cats: [],
     
     selectedCat: null,
+
+    adminActive: false,
 
     init: function() {
       App.model.cats.push(
@@ -29,6 +33,34 @@ var App = {
     init: function() {
       App.model.init();
       App.listView.init();
+      App.adminView.init();
+    },
+
+    toggleAdmin: function() {
+      App.model.adminActive = !App.model.adminActive;
+    },
+
+    set: function(property, value) {
+      App.model[property] = value;
+    },
+
+    get: function(property) {
+      return App.model[property];
+    },
+
+    saveNewState: function(newName, newImg, newCount) {
+      var selectedCat = this.get('selectedCat');
+
+      selectedCat.set('name', newName);
+      selectedCat.set('img', newImg);
+      selectedCat.set('count', newCount);
+
+      this.toggleAdmin();
+
+
+      App.listView.render();
+      App.catView.render();
+      App.adminView.render();
     },
 
     bindCatImgClickEvent: function(selectedCat) {
@@ -41,6 +73,7 @@ var App = {
     },
 
     bindCatListClickEvents: function() {
+      var _this = this;
       var cats = App.model.cats;
       var catsLength = cats.length;
       for (var i = 0; i < catsLength; i++) {
@@ -49,9 +82,10 @@ var App = {
 
         domListCat.addEventListener('click', (function(catCopy) {
           return function() {
-            App.model.selectedCat = catCopy;
-
+            _this.set('selectedCat', catCopy);
+            _this.set('adminActive', false);
             App.catView.render();
+            App.adminView.render();
           }
         })(cat));
       }
@@ -118,6 +152,50 @@ var App = {
 
         App.octopus.bindCatImgClickEvent(selectedCat);
       }
+    }
+  },
+
+  adminView: {
+    init: function() {
+      // App.octopus.bindAdminClickEvent();
+      var _this = this;
+
+      $('#admin-btn').click(function() {
+        if (! App.octopus.get('selectedCat')) {
+          return alert('please choose a cat first...');
+        }
+        App.octopus.toggleAdmin();
+        _this.render();
+      });
+
+      this.render();
+    },
+    render: function() {
+      var _this = this;
+
+      if (App.octopus.get('adminActive')) {
+        App.view.render('admin', '#admin-form', [App.model.selectedCat]);
+
+        $('#admin #cancel').click(function() {
+          _this.clear();
+        });
+
+        $('#admin #save').click(function() {
+          var newName = $('#new-name').val();
+          var newImg = $('#new-img').val();
+          var newCount = $('#new-count').val();
+
+          console.log(newName + newImg + newCount);
+
+          App.octopus.saveNewState(newName, newImg, newCount);
+        });
+
+      } else {
+        this.clear();
+      }
+    },
+    clear: function() {
+      $('#admin-form').html('');
     }
   }
 
